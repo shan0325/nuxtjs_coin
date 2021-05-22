@@ -1,0 +1,33 @@
+<template>
+  <v-card>
+    <v-card-title>
+      <p>{{ title }}</p>
+    </v-card-title>
+    <v-card-text>
+      <market-ticker-component :market-param="marketParam" />
+      <market-list-component @showDetailBus="showDetailBus" />
+    </v-card-text>
+  </v-card>
+</template>
+
+<script>
+import MarketListComponent from '@/components/market/MarketListComponent.vue'
+import MarketTickerComponent from '@/components/market/MarketTickerComponent.vue'
+export default {
+  components: {
+    MarketListComponent,
+    MarketTickerComponent,
+  },
+  data() {
+    return {
+      title: '코인 목록',
+      marketParam: null,
+    }
+  },
+  methods: {
+    showDetailBus(market) {
+      this.marketParam = market
+    },
+  },
+}
+</script>

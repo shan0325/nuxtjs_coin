@@ -1,0 +1,5 @@
+.nuxt
+.eslintrc.js
+nuxt.config.js
+.vscode
+*.scss
