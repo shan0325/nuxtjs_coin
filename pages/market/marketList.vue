@@ -4,7 +4,7 @@
       <p>{{ title }}</p>
     </v-card-title>
     <v-card-text>
-      <market-ticker-component :market-param="marketParam" />
+      <market-ticker-component :market-param="market" />
       <market-list-component @showDetailBus="showDetailBus" />
     </v-card-text>
   </v-card>
@@ -21,12 +21,12 @@ export default {
   data() {
     return {
       title: '코인 목록',
-      marketParam: null,
+      market: null,
     }
   },
   methods: {
     showDetailBus(market) {
-      this.marketParam = market
+      this.market = market
     },
   },
 }
