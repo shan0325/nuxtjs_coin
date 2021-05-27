@@ -2,22 +2,33 @@
   <v-dialog v-model="dialogDetail" scrollable max-width="600">
     <v-card>
       <v-toolbar color="primary">
-        <span class="headline white--text">{{ detailTitle }}</span>
+        <span class="headline white--text">{{ marketParam }}</span>
       </v-toolbar>
       <v-card-text>
         <div class="d-flex align-center py-2">
           <strong class="text-h5 font-weight-bold grey--text">
-            {{ this.marketParam }}
+            {{ priceComma(market.ticker.trade_price) }}
           </strong>
         </div>
         <v-divider></v-divider>
-        <div
-          class="text-subtitle-1 font-weight-medium mt-2"
-          v-html="priceComma(this.market.ticker.trade_price)"
-        ></div>
-        <!-- <div>
-          {{ market.ticker }}
-        </div> -->
+        <div class="text-subtitle-1 font-weight-medium mt-2">
+          거래량 {{ priceComma(market.ticker.acc_trade_volume_24h) }}
+        </div>
+        <div class="text-subtitle-1 font-weight-medium mt-2">
+          거래금 {{ priceComma(market.ticker.acc_trade_price_24h) }}
+        </div>
+        <div class="text-subtitle-1 font-weight-medium mt-2">
+          시가 {{ priceComma(market.ticker.opening_price) }}
+        </div>
+        <div class="text-subtitle-1 font-weight-medium mt-2">
+          고가 {{ priceComma(market.ticker.high_price) }}
+        </div>
+        <div class="text-subtitle-1 font-weight-medium mt-2">
+          저가 {{ priceComma(market.ticker.low_price) }}
+        </div>
+        <div class="text-subtitle-1 font-weight-medium mt-2">
+          종가 {{ priceComma(market.ticker.prev_closing_price) }}
+        </div>
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -42,21 +53,21 @@ export default {
       dialogDetail: false,
       detailTitle: '상세',
       subject: '코인',
-      detail: null,
+      detailInterval: null,
     }
   },
   watch: {
     marketParam() {
       if (this.marketParam) {
         this.getDetail()
-        this.detail = setInterval(() => {
+        this.detailInterval = setInterval(() => {
           this.getDetail()
         }, 100)
         this.dialogDetail = true
       }
     },
     dialogDetail(value) {
-      if (!value) clearInterval(this.detail)
+      if (!value) clearInterval(this.detailInterval)
     },
   },
   methods: {
