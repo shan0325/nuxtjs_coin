@@ -13,7 +13,7 @@
         <v-divider></v-divider>
         <div
           class="text-subtitle-1 font-weight-medium mt-2"
-          v-html="this.market.ticker"
+          v-html="priceComma(this.market.ticker.trade_price)"
         ></div>
         <!-- <div>
           {{ market.ticker }}
@@ -42,14 +42,21 @@ export default {
       dialogDetail: false,
       detailTitle: '상세',
       subject: '코인',
+      detail: null,
     }
   },
   watch: {
     marketParam() {
       if (this.marketParam) {
-        this.getDetail(this.getDetailApi, this.market.ticker)
+        this.getDetail()
+        this.detail = setInterval(() => {
+          this.getDetail()
+        }, 100)
         this.dialogDetail = true
       }
+    },
+    dialogDetail(value) {
+      if (!value) clearInterval(this.detail)
     },
   },
   methods: {
@@ -58,24 +65,14 @@ export default {
         `${this.api.ticker}?markets=${this.marketParam}`
       )
     },
-    getDetail(getDetailApi, ticker) {
-      // this.getDetailApi()
-      //   .then((response) => {
-      //     this.market.ticker = response[0]
-      //   })
-      //   .catch((error) => {
-      //     console.log(error)
-      //   })
-      setInterval(function () {
-        getDetailApi()
-          .then((response) => {
-            ticker = response[0]
-            console.log(ticker)
-          })
-          .catch((error) => {
-            console.log(error)
-          })
-      }, 1000)
+    getDetail() {
+      this.getDetailApi()
+        .then((response) => {
+          this.market.ticker = response[0]
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     },
     priceComma(price) {
       return price ? Number(price).toLocaleString() : ''
