@@ -68,7 +68,7 @@ export default {
 			return await this.$axios.$get(this.api.all);
 		},
 		showDetail(market) {
-			this.$emit('showDetailBus', market);
+			this.$emit('market', market);
 		},
 	},
 };

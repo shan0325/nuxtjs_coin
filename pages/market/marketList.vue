@@ -4,8 +4,11 @@
 			<p>{{ title }}</p>
 		</v-card-title>
 		<v-card-text>
-			<market-ticker-component :market-param="market" />
-			<market-list-component @showDetailBus="showDetailBus" />
+			<market-ticker-component
+				:market-param="market"
+				@market="showDetailBus"
+			/>
+			<market-list-component @market="showDetailBus" />
 		</v-card-text>
 	</v-card>
 </template>

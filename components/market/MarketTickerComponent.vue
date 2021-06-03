@@ -45,10 +45,20 @@ export default {
 	data() {
 		return {
 			api: {
-				ticker: 'https://api.upbit.com/v1/ticker',
+				ticker: {
+					url: 'https://api.upbit.com/v1/ticker',
+				},
+				candles: {
+					minutes: {
+						url: 'https://api.upbit.com/v1/candles/minutes',
+						minutes: 1,
+						count: 200,
+					},
+				},
 			},
 			market: {
 				ticker: {},
+				minutes: [],
 			},
 			dialogDetail: false,
 			detailTitle: '상세',
@@ -57,29 +67,44 @@ export default {
 		};
 	},
 	watch: {
-		marketParam() {
-			if (this.marketParam) {
+		marketParam(value) {
+			if (value) {
 				this.getDetail();
 				this.detailInterval = setInterval(() => {
 					this.getDetail();
-				}, 100);
+				}, 500);
 				this.dialogDetail = true;
 			}
 		},
 		dialogDetail(value) {
-			if (!value) clearInterval(this.detailInterval);
+			if (!value) {
+				clearInterval(this.detailInterval);
+				this.$emit('market', null);
+			}
 		},
 	},
 	methods: {
-		async getDetailApi() {
-			return await this.$axios.$get(
-				`${this.api.ticker}?markets=${this.marketParam}`,
+		getDetailApi() {
+			return this.$axios.$get(
+				`${this.api.ticker.url}?markets=${this.marketParam}`,
+			);
+		},
+		getCandlesMinutes() {
+			return this.$axios.$get(
+				`${this.api.candles.minutes.url}/1?market=${this.marketParam}&count=${this.api.candles.minutes.count}`,
 			);
 		},
 		getDetail() {
 			this.getDetailApi()
 				.then(response => {
 					this.market.ticker = response[0];
+					this.getCandlesMinutes()
+						.then(response => {
+							this.market.minutes = response;
+						})
+						.catch(error => {
+							console.log(error);
+						});
 				})
 				.catch(error => {
 					console.log(error);

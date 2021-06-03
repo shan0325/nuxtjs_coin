@@ -25,10 +25,6 @@ For detailed explanation on how things work, check out [Nuxt.js docs](https://nu
 
 ```bash
 {
-    "workbench.colorTheme": "Night Owl",
-    "settingsSync.ignoredExtensions": [
-
-    ],
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.fixAll": true
