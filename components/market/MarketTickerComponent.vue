@@ -98,13 +98,14 @@ export default {
 			this.getDetailApi()
 				.then(response => {
 					this.market.ticker = response[0];
-					this.getCandlesMinutes()
-						.then(response => {
-							this.market.minutes = response;
-						})
-						.catch(error => {
-							console.log(error);
-						});
+				})
+				.catch(error => {
+					console.log(error);
+				});
+
+			this.getCandlesMinutes()
+				.then(response => {
+					this.market.minutes = response;
 				})
 				.catch(error => {
 					console.log(error);
