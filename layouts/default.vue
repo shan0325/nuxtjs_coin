@@ -96,6 +96,11 @@ export default {
 					title: 'COIN CHARTS',
 					to: '/market/coinCharts',
 				},
+				{
+					icon: 'mdi-finance',
+					title: 'CODEPEN',
+					to: '/market/codepen',
+				},
 			],
 			miniVariant: false,
 			right: true,
