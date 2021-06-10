@@ -99,7 +99,7 @@ export default {
 				{
 					icon: 'mdi-finance',
 					title: 'CODEPEN',
-					to: '/market/codepen',
+					to: '/codepen/codepen',
 				},
 			],
 			miniVariant: false,
