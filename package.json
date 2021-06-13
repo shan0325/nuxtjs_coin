@@ -16,7 +16,8 @@
     "express": "^4.17.1",
     "nuxt": "^2.15.6",
     "sass": "^1.34.1",
-    "trading-vue-js": "^1.0.2",
+    "three": "^0.84.0",
+    "trading-vue-js": "^1.0.0",
     "yarn": "^1.22.10"
   },
   "devDependencies": {
@@ -30,5 +31,10 @@
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.10.0",
     "prettier": "^2.3.0"
-  }
+  },
+  "eslintIgnore": [
+    "lion.vue",
+    "lion.js",
+    "three.min.js"
+  ]
 }

@@ -1,35 +1,24 @@
 <template>
-	<v-continer>
-		<v-row>
-			<v-col cols="12">
-				<div class="text-h4 font-weight-bold">KRW-BTC</div>
-			</v-col>
-		</v-row>
-		<v-row justify="center" align="center">
-			<v-col id="charts" cols="12" align="center">
-				<trading-vue
-					:data="market.minutes"
-					:width="width"
-					:height="height"
-					:color-back="colors.colorBack"
-					:color-grid="colors.colorGrid"
-					:color-text="colors.colorText"
-				>
-				</trading-vue>
-			</v-col>
-		</v-row>
-	</v-continer>
+	<div id="charts">
+		<trading-vue
+			:data="market.minutes"
+			:width="width"
+			:height="height"
+			:color-back="colors.colorBack"
+			:color-grid="colors.colorGrid"
+			:color-text="colors.colorText"
+		>
+		</trading-vue>
+	</div>
 </template>
 
 <script>
 import TradingVue from 'trading-vue-js';
-import Data from '@/data/data2.json';
 
 export default {
 	components: { TradingVue },
 	data() {
 		return {
-			chart: Data,
 			width: window.innerWidth,
 			height: window.innerHeight,
 			colors: {

@@ -97,9 +97,14 @@ export default {
 					to: '/market/coinCharts',
 				},
 				{
-					icon: 'mdi-finance',
+					icon: 'mdi-android',
 					title: 'CODEPEN',
 					to: '/codepen/codepen',
+				},
+				{
+					icon: 'mdi-apple',
+					title: 'VUEX STORE',
+					to: '/test/vuexTest/parent',
 				},
 			],
 			miniVariant: false,

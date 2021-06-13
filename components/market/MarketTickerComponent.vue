@@ -103,13 +103,13 @@ export default {
 					console.log(error);
 				});
 
-			this.getCandlesMinutes()
-				.then(response => {
-					this.market.minutes = response;
-				})
-				.catch(error => {
-					console.log(error);
-				});
+			// this.getCandlesMinutes()
+			// 	.then(response => {
+			// 		this.market.minutes = response;
+			// 	})
+			// 	.catch(error => {
+			// 		console.log(error);
+			// 	});
 		},
 		priceComma(price) {
 			return price ? Number(price).toLocaleString() : '';

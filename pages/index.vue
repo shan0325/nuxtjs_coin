@@ -1,5 +1,5 @@
 <template>
-	<v-container>
+	<div>
 		<v-row align="center">
 			<v-col cols="12" align="center">
 				<div class="mt-5 pb-6 font-weight-bold text-h4">
@@ -14,7 +14,7 @@
 				<fox />
 			</v-col>
 		</v-row>
-	</v-container>
+	</div>
 </template>
 
 <script>
