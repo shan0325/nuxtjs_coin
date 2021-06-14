@@ -46,9 +46,7 @@
 			</v-btn>
 		</v-app-bar>
 		<v-main>
-			<v-container>
-				<nuxt />
-			</v-container>
+			<nuxt />
 		</v-main>
 		<v-navigation-drawer
 			v-model="rightDrawer"

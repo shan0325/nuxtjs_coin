@@ -1,16 +1,18 @@
 <template>
-	<v-card>
-		<v-card-title>
-			<p>{{ title }}</p>
-		</v-card-title>
-		<v-card-text>
-			<market-ticker-component
-				:market-param="market"
-				@market="showDetailBus"
-			/>
-			<market-list-component @market="showDetailBus" />
-		</v-card-text>
-	</v-card>
+	<v-container>
+		<v-card>
+			<v-card-title>
+				<p>{{ title }}</p>
+			</v-card-title>
+			<v-card-text>
+				<market-ticker-component
+					:market-param="market"
+					@market="showDetailBus"
+				/>
+				<market-list-component @market="showDetailBus" />
+			</v-card-text>
+		</v-card>
+	</v-container>
 </template>
 
 <script>

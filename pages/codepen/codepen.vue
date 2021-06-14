@@ -1,5 +1,7 @@
 <template>
-	<codepen />
+	<v-container>
+		<codepen />
+	</v-container>
 </template>
 
 <script>

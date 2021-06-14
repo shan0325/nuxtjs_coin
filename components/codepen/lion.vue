@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="lion">
 		<div id="world"></div>
 		<!-- <div id="instructions">Press and drag to make wind<br/><span class="lightInstructions">the lion will surely appreciate</span></div> -->
 	</div>
@@ -623,8 +623,8 @@ export default {
 	methods: {
 		init() {
 			scene = new THREE.Scene();
-			HEIGHT = window.innerHeight;
-			WIDTH = window.innerWidth;
+			HEIGHT = document.querySelector("#world").offsetHeight;
+			WIDTH = document.querySelector("#world").offsetWidth;
 			aspectRatio = WIDTH / HEIGHT;
 			fieldOfView = 60;
 			nearPlane = 1;
@@ -674,7 +674,7 @@ export default {
 		},
 
 		handleMouseMove(event) {
-			mousePos = { x: event.clientX, y: event.clientY };
+			mousePos = { x: event.layerX, y: event.layerY };
 		},
 
 		handleMouseDown(event) {
@@ -780,12 +780,14 @@ export default {
 
 <style>
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:800);
+.lion {
+	text-align: center;
+}
 #world {
-	background: #ebe5e7;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
+	background: #121212;
+	width: 800px;
+	height: 600px;
+	display: inline-block;
 }
 #instructions {
 	position: absolute;
