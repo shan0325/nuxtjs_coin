@@ -1,34 +1,32 @@
 <template>
-	<div>
-		<v-data-table
-			:headers="headers"
-			:items="market.all"
-			:items-per-page="100"
-			class="elevation-1"
-			:search="search"
-		>
-			<template #top>
-				<v-text-field
-					v-model="search"
-					label="검색은 여기서"
-					class="mx-4"
-				></v-text-field>
-			</template>
-			<template #body="{ items }">
-				<tbody>
-					<tr
-						v-for="(item, i) in items"
-						:key="i"
-						@click="showDetail(item.market)"
-					>
-						<td>{{ item.market }}</td>
-						<td>{{ item.korean_name }}</td>
-						<td>{{ item.english_name }}</td>
-					</tr>
-				</tbody>
-			</template>
-		</v-data-table>
-	</div>
+	<v-data-table
+		:headers="headers"
+		:items="market.all"
+		:items-per-page="100"
+		class="elevation-1"
+		:search="search"
+	>
+		<template #top>
+			<v-text-field
+				v-model="search"
+				label="검색은 여기서"
+				class="mx-4"
+			></v-text-field>
+		</template>
+		<template #body="{ items }">
+			<tbody>
+				<tr
+					v-for="(item, i) in items"
+					:key="i"
+					@click="showDetail(item.market)"
+				>
+					<td>{{ item.market }}</td>
+					<td>{{ item.korean_name }}</td>
+					<td>{{ item.english_name }}</td>
+				</tr>
+			</tbody>
+		</template>
+	</v-data-table>
 </template>
 
 <script>
