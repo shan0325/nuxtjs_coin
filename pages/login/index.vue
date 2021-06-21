@@ -58,9 +58,16 @@
 							:top="true"
 						>
 							{{ errorMessages }}
-							<v-btn dark @click="snackbar = false">
-								Close
-							</v-btn>
+							<template #action="{ attrs }">
+								<v-btn
+									color="red"
+									text
+									v-bind="attrs"
+									@click="snackbar = false"
+								>
+									Close
+								</v-btn>
+							</template>
 						</v-snackbar>
 					</v-card>
 				</v-flex>

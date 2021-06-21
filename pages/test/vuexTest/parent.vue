@@ -23,10 +23,7 @@
 						<div class="my-4 text-subtitle-1">
 							$ • Italian, Cafe
 						</div>
-						<div v-html="getContent">
-							<!-- Small plates, salads & sandwiches - an intimate setting
-						with 12 indoor seats plus patio seating. -->
-						</div>
+						<div v-html="content"></div>
 					</v-card-text>
 				</v-card>
 

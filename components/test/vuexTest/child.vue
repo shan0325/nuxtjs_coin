@@ -20,9 +20,9 @@
 export default {
 	methods: {
 		addContent(content) {
-			// this.$emit('emitContent', content);
+			this.$emit('emitContent', content);
 			// this.$store.state.test.content = content;
-			this.$store.commit('test/setContent', content);
+			// this.$store.commit('test/setContent', content);
 		},
 	},
 };
