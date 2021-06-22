@@ -41,7 +41,7 @@
 			</v-btn>
 			<v-toolbar-title v-text="title" />
 			<v-spacer />
-			<v-btn text @click="$router.push('/login')"> CMS 로그인 </v-btn>
+			<v-btn text @click="$router.push('/cms/login')"> CMS 로그인 </v-btn>
 			<!-- <v-btn icon @click.stop="rightDrawer = !rightDrawer">
 				<v-icon>mdi-menu</v-icon>
 			</v-btn> -->

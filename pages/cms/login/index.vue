@@ -78,7 +78,7 @@
 
 <script>
 export default {
-	layout: 'login',
+	layout: 'cms/login',
 	data() {
 		return {
 			userId: '',
@@ -91,6 +91,7 @@ export default {
 	},
 	methods: {
 		doLogin() {
+			const axios = this.$axios;
 			const userId = this.userId;
 			const password = this.password;
 
@@ -102,18 +103,19 @@ export default {
 			if (password === '') {
 				this.errorMessages = '비밀번호는 필수 입력입니다.';
 				this.snackbar = true;
+				return;
 			}
 
-			// this.$store
-			// 	.dispatch('login', { userId, password })
-			// 	.then(response => {
-			// 		this.$router.push(common.ROOT_PATH + '/dashboard');
-			// 	})
-			// 	.catch(error => {
-			// 		console.log(error.response.data.error_description);
-			// 		this.errorMessages = '로그인 정보를 다시 확인해주세요.';
-			// 		this.snackbar = true;
-			// 	});
+			this.$store
+				.dispatch('cms/login/login', { axios, userId, password })
+				.then(response => {
+					this.$router.push('/');
+				})
+				.catch(error => {
+					console.log(error.response.data.error_description);
+					this.errorMessages = '로그인 정보를 다시 확인해주세요.';
+					this.snackbar = true;
+				});
 		},
 	},
 };
