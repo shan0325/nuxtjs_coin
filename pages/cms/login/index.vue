@@ -91,7 +91,6 @@ export default {
 	},
 	methods: {
 		doLogin() {
-			const axios = this.$axios;
 			const userId = this.userId;
 			const password = this.password;
 
@@ -107,13 +106,13 @@ export default {
 			}
 
 			this.$store
-				.dispatch('cms/login/login', { axios, userId, password })
+				.dispatch('cms/login/login', { userId, password })
 				.then(response => {
+					// console.log(response);
 					this.$router.push('/');
 				})
 				.catch(error => {
-					console.log(error.response.data.error_description);
-					this.errorMessages = '로그인 정보를 다시 확인해주세요.';
+					this.errorMessages = error.message;
 					this.snackbar = true;
 				});
 		},

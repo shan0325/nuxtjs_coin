@@ -1,4 +1,3 @@
-import axios from 'axios';
 import VueJwtDecode from 'vue-jwt-decode';
 
 export const state = () => ({
@@ -33,49 +32,56 @@ export const mutations = {
 };
 
 export const actions = {
-	login({ commit, getters }, payload) {
-		return new Promise((resolve, reject) => {
-			commit('setAuthStatusRequest');
-			console.log(payload);
+	async login({ commit, getters }, payload) {
+		commit('setAuthStatusRequest');
 
-			const data = new FormData();
-			data.append('isManager', 'Y');
-			data.append('grant_type', 'password');
-			data.append('username', payload.userId);
-			data.append('password', payload.password);
+		const data = new FormData();
+		data.append('isManager', 'Y');
+		data.append('grant_type', 'password');
+		data.append('username', payload.userId);
+		data.append('password', payload.password);
 
-			const config = {
-				headers: {
-					'Content-type': 'application/x-www-form-urlencoded',
-					Authorization: getters.getBasicAuth,
-				},
-			};
+		const config = {
+			headers: {
+				'Content-type': 'application/x-www-form-urlencoded',
+				Authorization: getters.getBasicAuth,
+			},
+		};
 
-			payload.axios
-				.$post('/oauth/token', data, config)
-				.then(response => {
-					// console.log(response.data)
-					const token = response.data.access_token;
+		try {
+			const response = await this.$axios.$post(
+				'/oauth/token',
+				data,
+				config,
+			);
 
-					// 토큰을 localStorage에 저장
-					localStorage.setItem('token', token);
-					axios.defaults.headers.common.Authorization =
-						'Bearer ' + token;
+			const token = response.access_token;
 
-					commit('setAuthStatusSuccess', { token });
-					resolve(response);
-				})
-				.catch(error => {
-					commit('setAuthStatusError');
-					localStorage.removeItem('token');
-					reject(error);
-				});
-		});
+			// 토큰을 localStorage에 저장
+			localStorage.setItem('token', token);
+			this.$axios.defaults.headers.common.Authorization =
+				'Bearer ' + token;
+
+			commit('setAuthStatusSuccess', { token });
+			return response;
+		} catch (error) {
+			const errorData = error.response.data;
+			if (
+				errorData &&
+				errorData.error_description === 'Bad credentials'
+			) {
+				throw new Error('로그인 정보를 다시 확인해주세요');
+			}
+			console.error(error);
+			throw new Error(
+				'시스템 오류가 발생하였습니다. 잠시후 다시 시도해주세요',
+			);
+		}
 	},
 	logout({ commit }) {
 		return new Promise(resolve => {
 			localStorage.removeItem('token');
-			delete axios.defaults.headers.common.Authorization;
+			delete this.$axios.defaults.headers.common.Authorization;
 			commit('setLogout');
 			resolve();
 		});
@@ -99,21 +105,21 @@ export const actions = {
 				},
 			};
 
-			axios
+			this.$axios
 				.post('/spring-admin/auth/token/refresh', data, config)
 				.then(response => {
 					const token = response.data.access_token;
 
 					// 토큰을 localstorage에 저장
 					localStorage.setItem('token', token);
-					axios.defaults.headers.common.Authorization =
+					this.$axios.defaults.headers.common.Authorization =
 						'Bearer ' + token;
 
 					commit('setAuthStatusSuccess', { token });
 					resolve(token);
 				})
 				.catch(error => {
-					console.log(error.response);
+					console.error(error);
 					commit('setAuthStatusError');
 					localStorage.removeItem('token');
 				});
