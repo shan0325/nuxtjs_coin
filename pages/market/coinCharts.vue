@@ -68,16 +68,15 @@
 
 <script>
 import MarketListComponent from '@/components/market/MarketListComponent.vue';
-import { TradingVue } from 'trading-vue-js';
 import testOverlay from './testOverlay.vue';
 
 export default {
-	components: { MarketListComponent, TradingVue },
+	components: { MarketListComponent },
 	data() {
 		return {
 			market: 'KRW-BTC',
-			width: window.innerWidth,
-			height: window.innerHeight,
+			width: 500,
+			height: 500,
 			colors: {
 				colorBack: '#fff',
 				colorGrid: '#eee',
@@ -125,19 +124,6 @@ export default {
 		this.width = document.querySelector('#charts').offsetWidth;
 		this.height = 500;
 		window.addEventListener('resize', this.onResize);
-
-		// document.onkeydown = function (event) {
-		// 	if (event.keyCode === 116) {
-		// 		alert('새로고침을 할 수 없습니다.');
-		// 		event.keyCode = 2;
-		// 		return false;
-		// 	} else if (
-		// 		event.ctrlKey &&
-		// 		(event.keyCode === 78 || event.keyCode === 82)
-		// 	) {
-		// 		return false;
-		// 	}
-		// };
 
 		this.updateChart();
 	},

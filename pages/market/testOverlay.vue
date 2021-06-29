@@ -4,11 +4,10 @@
 // TODO: make a real spline, not a bunch of lines...
 
 // Adds all necessary stuff for you.
-import { Overlay } from 'trading-vue-js';
 
 export default {
 	name: 'TestOverlay',
-	mixins: [Overlay],
+	mixins: [],
 	data() {
 		return {
 			COLORS: ['#5691ce', '#612ff9', '#d50b90', '#ff2316'],
