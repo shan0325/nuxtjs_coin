@@ -105,6 +105,11 @@ export default {
 					title: 'VUEX STORE',
 					to: '/test/vuexTest/parent',
 				},
+				{
+					icon: 'mdi-cube-outline',
+					title: 'GAME',
+					to: '/game/tetris/tetris',
+				},
 			],
 			miniVariant: false,
 			right: true,
