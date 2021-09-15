@@ -16,10 +16,9 @@ export default {
 				rows: 20,
 				size: 30,
 			},
-			shapes: {
-				x: 120,
-				y: 0,
-				I: {
+			shapes: [
+				{
+					type: 'I',
 					mat: [
 						[0, 0, 1, 0, 0],
 						[0, 0, 1, 0, 0],
@@ -28,33 +27,43 @@ export default {
 						[0, 0, 1, 0, 0],
 					],
 				},
-				L: {
+				{
+					type: 'L',
 					mat: [
 						[0, 1, 0],
 						[0, 1, 0],
 						[0, 1, 1],
 					],
 				},
-				O: {
+				{
+					type: 'O',
 					mat: [
 						[1, 1],
 						[1, 1],
 					],
 				},
-				T: {
+				{
+					type: 'T',
 					mat: [
 						[1, 1, 1],
 						[0, 1, 0],
-						[0, 1, 1],
+						[0, 1, 0],
 					],
 				},
-				Z: {
+				{
+					type: 'Z',
 					mat: [
 						[1, 1, 0],
 						[0, 1, 0],
 						[0, 1, 1],
 					],
 				},
+			],
+			shape: {
+				obj: null,
+				posX: 0,
+				posY: 0,
+				isMake: false,
 			},
 			board: null,
 			reqAni: null,
@@ -77,29 +86,38 @@ export default {
 			} else if (e.keyCode === 37) {
 				this.shapes.x -= 30;
 			}
-
-			this.draw();
 		},
 		draw() {
 			// 기존 실행되고있는 requestAnimationFrame 취소
-			cancelAnimationFrame(this.reqAni);
+			// cancelAnimationFrame(this.reqAni);
 
 			this.ctx.clearRect(0, 0, this.width, this.height);
 			this.drawBackground();
-			// this.drawShapes();
+			this.drawShapes();
 
-			this.reqAni = requestAnimationFrame(this.draw);
+			// this.reqAni = requestAnimationFrame(this.draw);
+			this.reqAni = setTimeout(this.draw, 1000);
 		},
 		drawShapes() {
-			if (this.shapes.y >= this.height - 60) {
-				this.shapes.x = 120;
-				this.shapes.y = 0;
+			if (!this.isMake) {
+				const randomNum = this.getRandomInt(0, this.shapes.length - 1);
+				this.shape.obj = this.shapes[randomNum];
+				this.isMake = true;
+
+				console.log(this.shape.obj);
 			}
-			this.ctx.beginPath();
-			this.ctx.fillStyle = '#999';
-			this.shapes.y += 1;
-			this.ctx.fillRect(this.shapes.x, this.shapes.y, 60, 60);
-			this.ctx.closePath();
+
+			for (let i = 0; i < this.shape.obj.mat.length; i++) {
+				for (let j = 0; j < this.shape.obj.mat[i].length; j++) {
+					if (this.shape.obj.mat[i][j] === 1) {
+						this.board[this.shape.posY + i][
+							this.shape.posX + j
+						] = 1;
+					}
+				}
+			}
+			this.shape.posY += 1;
+			console.log(this.board);
 		},
 		drawBackground() {
 			this.ctx.beginPath();
@@ -117,6 +135,11 @@ export default {
 				this.ctx.stroke();
 			}
 			this.ctx.closePath();
+		},
+		getRandomInt(min, max) {
+			min = Math.ceil(min);
+			max = Math.floor(max);
+			return Math.floor(Math.random() * (max - min + 1)) + min; // 최댓값도 포함, 최솟값도 포함
 		},
 	},
 };
