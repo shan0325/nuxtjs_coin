@@ -11,17 +11,61 @@ export default {
 			ctx: null,
 			width: 300,
 			height: 600,
-			x: 10,
-			y: 20,
+			block: {
+				cols: 10,
+				rows: 20,
+				size: 30,
+			},
 			shapes: {
 				x: 120,
 				y: 0,
+				I: {
+					mat: [
+						[0, 0, 1, 0, 0],
+						[0, 0, 1, 0, 0],
+						[0, 0, 1, 0, 0],
+						[0, 0, 1, 0, 0],
+						[0, 0, 1, 0, 0],
+					],
+				},
+				L: {
+					mat: [
+						[0, 1, 0],
+						[0, 1, 0],
+						[0, 1, 1],
+					],
+				},
+				O: {
+					mat: [
+						[1, 1],
+						[1, 1],
+					],
+				},
+				T: {
+					mat: [
+						[1, 1, 1],
+						[0, 1, 0],
+						[0, 1, 1],
+					],
+				},
+				Z: {
+					mat: [
+						[1, 1, 0],
+						[0, 1, 0],
+						[0, 1, 1],
+					],
+				},
 			},
+			board: null,
 			reqAni: null,
 		};
 	},
 	mounted() {
 		this.ctx = document.getElementById('canvas').getContext('2d');
+		this.board = Array.from(Array(this.block.rows), () =>
+			new Array(this.block.cols).fill(0),
+		);
+
 		this.draw();
 
 		document.addEventListener('keydown', this.keyDownHandler, false);
@@ -42,7 +86,7 @@ export default {
 
 			this.ctx.clearRect(0, 0, this.width, this.height);
 			this.drawBackground();
-			this.drawShapes();
+			// this.drawShapes();
 
 			this.reqAni = requestAnimationFrame(this.draw);
 		},
@@ -61,15 +105,15 @@ export default {
 			this.ctx.beginPath();
 			this.ctx.strokeStyle = '#efefef';
 
-			for (let i = 1; i < this.x; i++) {
-				this.ctx.moveTo(i * 30, 0);
-				this.ctx.lineTo(i * 30, 600);
+			for (let i = 1; i < this.block.cols; i++) {
+				this.ctx.moveTo(i * this.block.size, 0);
+				this.ctx.lineTo(i * this.block.size, this.height);
 				this.ctx.stroke();
 			}
 
-			for (let i = 1; i < this.y; i++) {
-				this.ctx.moveTo(0, i * 30);
-				this.ctx.lineTo(300, i * 30);
+			for (let i = 1; i < this.block.rows; i++) {
+				this.ctx.moveTo(0, i * this.block.size);
+				this.ctx.lineTo(this.width, i * this.block.size);
 				this.ctx.stroke();
 			}
 			this.ctx.closePath();
