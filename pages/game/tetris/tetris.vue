@@ -19,77 +19,131 @@ export default {
 			shapes: [
 				{
 					type: 'I',
-					direction: 0,
-					mat: [
-						[0, 0, 1, 0, 0],
-						[0, 0, 1, 0, 0],
-						[0, 0, 1, 0, 0],
-						[0, 0, 1, 0, 0],
-						[0, 0, 1, 0, 0],
-					],
+					startPosX: 4,
+					mat: [[[1], [1], [1], [1]], [[1, 1, 1, 1]]],
 				},
 				{
 					type: 'J',
-					direction: 0,
+					startPosX: 4,
 					mat: [
-						[0, 1, 0],
-						[0, 1, 0],
-						[1, 1, 0],
+						[
+							[0, 1],
+							[0, 1],
+							[1, 1],
+						],
+						[
+							[1, 1, 1],
+							[0, 0, 1],
+						],
+						[
+							[1, 1],
+							[1, 0],
+							[1, 0],
+						],
+						[
+							[1, 0, 0],
+							[1, 1, 1],
+						],
 					],
 				},
 				{
 					type: 'L',
-					direction: 0,
+					startPosX: 4,
 					mat: [
-						[0, 1, 0],
-						[0, 1, 0],
-						[0, 1, 1],
+						[
+							[1, 0],
+							[1, 0],
+							[1, 1],
+						],
+						[
+							[0, 0, 1],
+							[1, 1, 1],
+						],
+						[
+							[1, 1],
+							[0, 1],
+							[0, 1],
+						],
+						[
+							[1, 1, 1],
+							[1, 0, 0],
+						],
 					],
 				},
 				{
 					type: 'O',
-					direction: 0,
+					startPosX: 4,
 					mat: [
-						[1, 1],
-						[1, 1],
+						[
+							[1, 1],
+							[1, 1],
+						],
 					],
 				},
 				{
 					type: 'T',
-					direction: 0,
+					startPosX: 4,
 					mat: [
-						[1, 1, 1],
-						[0, 1, 0],
-						[0, 1, 0],
+						[
+							[1, 1, 1],
+							[0, 1, 0],
+						],
+						[
+							[1, 0],
+							[1, 1],
+							[1, 0],
+						],
+						[
+							[0, 1, 0],
+							[1, 1, 1],
+						],
+						[
+							[0, 1],
+							[1, 1],
+							[0, 1],
+						],
 					],
 				},
 				{
 					type: 'Z',
-					direction: 0,
+					startPosX: 4,
 					mat: [
-						[1, 1, 0],
-						[0, 1, 0],
-						[0, 1, 1],
+						[
+							[1, 1, 0],
+							[0, 1, 1],
+						],
+						[
+							[0, 1],
+							[1, 1],
+							[1, 0],
+						],
 					],
 				},
 				{
 					type: 'S',
-					direction: 0,
+					startPosX: 4,
 					mat: [
-						[0, 1, 1],
-						[0, 1, 0],
-						[1, 1, 0],
+						[
+							[0, 1, 1],
+							[1, 1, 0],
+						],
+						[
+							[1, 0],
+							[1, 1],
+							[0, 1],
+						],
 					],
 				},
 			],
 			shape: {
+				isMake: false,
 				obj: null,
 				posX: 0,
 				posY: 0,
-				isMake: false,
-				beforeObj: {},
+				direction: 0,
 			},
 			board: null,
+			beforeBoard: null,
 			reqAni: null,
 		};
 	},
@@ -106,9 +160,14 @@ export default {
 	methods: {
 		keyDownHandler(e) {
 			if (e.keyCode === 39) {
-				this.shapes.x += 30;
+				const matrix = this.shape.obj.mat[this.shape.direction];
+				if (this.shape.posX + matrix[0].length < this.block.cols) {
+					this.shape.posX += 1;
+				}
 			} else if (e.keyCode === 37) {
-				this.shapes.x -= 30;
+				if (this.shape.posX > 0) {
+					this.shape.posX -= 1;
+				}
 			}
 		},
 		draw() {
@@ -120,14 +179,14 @@ export default {
 			this.drawShape();
 
 			// this.reqAni = requestAnimationFrame(this.draw);
-			this.reqAni = setTimeout(this.draw, 100);
+			this.reqAni = setTimeout(this.draw, 500);
 		},
 		drawShape() {
-			if (!this.isMake) {
-				// const randomNum = this.getRandomInt(0, this.shapes.length - 1);
-				const randomNum = 1;
+			if (!this.shape.isMake) {
+				const randomNum = this.getRandomInt(0, this.shapes.length - 1);
 				this.shape.obj = this.shapes[randomNum];
-				this.isMake = true;
+				this.shape.posX = this.shape.obj.startPosX;
+				this.shape.isMake = true;
 				console.log(this.shape.obj);
 			}
 
@@ -135,9 +194,14 @@ export default {
 				this.board[i].fill(0);
 			}
 
-			for (let i = 0; i < this.shape.obj.mat.length; i++) {
-				for (let j = 0; j < this.shape.obj.mat[i].length; j++) {
-					if (this.shape.obj.mat[i][j] === 1) {
+			if (this.beforeBoard) {
+				this.cloneBoard(this.beforeBoard, this.board);
+			}
+
+			const matrix = this.shape.obj.mat[this.shape.direction];
+			for (let i = 0; i < matrix.length; i++) {
+				for (let j = 0; j < matrix[i].length; j++) {
+					if (matrix[i][j] === 1) {
 						this.board[this.shape.posY + i][
 							this.shape.posX + j
 						] = 1;
@@ -145,20 +209,33 @@ export default {
 				}
 			}
 
-			console.log(this.board);
-			// for (let i = 0; i < this.board.length; i++) {
-			// 	for (let j = 0; j < this.board[i].length; j++) {
-			// 		process.stdout.write(this.board[i][j] + ',');
-			// 	}
-			// 	console.log();
-			// }
+			// board 출력
+			this.printBoard(this.board);
 
-			if (this.shape.posY + 2 >= this.block.rows - 1) {
-				this.isMake = false;
+			if (this.shape.posY + matrix.length >= this.block.rows) {
+				this.beforeBoard = JSON.parse(JSON.stringify(this.board));
+				this.shape.isMake = false;
 				this.shape.posY = 0;
 			} else {
 				this.shape.posY += 1;
 			}
+		},
+		cloneBoard(source, target) {
+			for (let i = 0; i < source.length; i++) {
+				for (let j = 0; j < source[i].length; j++) {
+					target[i][j] = source[i][j];
+				}
+			}
+		},
+		printBoard(board) {
+			let line = '';
+			for (let i = 0; i < board.length; i++) {
+				for (let j = 0; j < board[i].length; j++) {
+					line += board[i][j] + ' ';
+				}
+				line += '\n';
+			}
+			console.log(line);
 		},
 		drawBackground() {
 			this.ctx.beginPath();
