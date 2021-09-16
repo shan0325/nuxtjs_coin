@@ -176,19 +176,13 @@ export default {
 
 			this.ctx.clearRect(0, 0, this.width, this.height);
 			this.drawBackground();
-			this.drawShape();
+			this.start();
 
 			// this.reqAni = requestAnimationFrame(this.draw);
 			this.reqAni = setTimeout(this.draw, 500);
 		},
-		drawShape() {
-			if (!this.shape.isMake) {
-				const randomNum = this.getRandomInt(0, this.shapes.length - 1);
-				this.shape.obj = this.shapes[randomNum];
-				this.shape.posX = this.shape.obj.startPosX;
-				this.shape.isMake = true;
-				console.log(this.shape.obj);
-			}
+		start() {
+			this.makeShape();
 
 			for (let i = 0; i < this.board.length; i++) {
 				this.board[i].fill(0);
@@ -209,8 +203,8 @@ export default {
 				}
 			}
 
-			// board 출력
 			this.printBoard(this.board);
+			this.drawShape();
 
 			if (this.shape.posY + matrix.length >= this.block.rows) {
 				this.beforeBoard = JSON.parse(JSON.stringify(this.board));
@@ -218,6 +212,32 @@ export default {
 				this.shape.posY = 0;
 			} else {
 				this.shape.posY += 1;
+			}
+		},
+		makeShape() {
+			if (!this.shape.isMake) {
+				const randomNum = this.getRandomInt(0, this.shapes.length - 1);
+				this.shape.obj = this.shapes[randomNum];
+				this.shape.posX = this.shape.obj.startPosX;
+				this.shape.isMake = true;
+				console.log(this.shape.obj);
+			}
+		},
+		drawShape() {
+			for (let i = 0; i < this.board.length; i++) {
+				for (let j = 0; j < this.board[i].length; j++) {
+					if (this.board[i][j] === 1) {
+						this.ctx.beginPath();
+						this.ctx.fillStyle = '#999';
+						this.ctx.fillRect(
+							j * this.block.size,
+							i * this.block.size,
+							this.block.size,
+							this.block.size,
+						);
+						this.ctx.closePath();
+					}
+				}
 			}
 		},
 		cloneBoard(source, target) {
