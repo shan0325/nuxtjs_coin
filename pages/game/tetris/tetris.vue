@@ -19,6 +19,7 @@ export default {
 			shapes: [
 				{
 					type: 'I',
+					direction: 0,
 					mat: [
 						[0, 0, 1, 0, 0],
 						[0, 0, 1, 0, 0],
@@ -28,7 +29,17 @@ export default {
 					],
 				},
 				{
+					type: 'J',
+					direction: 0,
+					mat: [
+						[0, 1, 0],
+						[0, 1, 0],
+						[1, 1, 0],
+					],
+				},
+				{
 					type: 'L',
+					direction: 0,
 					mat: [
 						[0, 1, 0],
 						[0, 1, 0],
@@ -37,6 +48,7 @@ export default {
 				},
 				{
 					type: 'O',
+					direction: 0,
 					mat: [
 						[1, 1],
 						[1, 1],
@@ -44,6 +56,7 @@ export default {
 				},
 				{
 					type: 'T',
+					direction: 0,
 					mat: [
 						[1, 1, 1],
 						[0, 1, 0],
@@ -52,10 +65,20 @@ export default {
 				},
 				{
 					type: 'Z',
+					direction: 0,
 					mat: [
 						[1, 1, 0],
 						[0, 1, 0],
 						[0, 1, 1],
+					],
+				},
+				{
+					type: 'S',
+					direction: 0,
+					mat: [
+						[0, 1, 1],
+						[0, 1, 0],
+						[1, 1, 0],
 					],
 				},
 			],
@@ -64,6 +87,7 @@ export default {
 				posX: 0,
 				posY: 0,
 				isMake: false,
+				beforeObj: {},
 			},
 			board: null,
 			reqAni: null,
@@ -93,18 +117,22 @@ export default {
 
 			this.ctx.clearRect(0, 0, this.width, this.height);
 			this.drawBackground();
-			this.drawShapes();
+			this.drawShape();
 
 			// this.reqAni = requestAnimationFrame(this.draw);
-			this.reqAni = setTimeout(this.draw, 1000);
+			this.reqAni = setTimeout(this.draw, 100);
 		},
-		drawShapes() {
+		drawShape() {
 			if (!this.isMake) {
-				const randomNum = this.getRandomInt(0, this.shapes.length - 1);
+				// const randomNum = this.getRandomInt(0, this.shapes.length - 1);
+				const randomNum = 1;
 				this.shape.obj = this.shapes[randomNum];
 				this.isMake = true;
-
 				console.log(this.shape.obj);
+			}
+
+			for (let i = 0; i < this.board.length; i++) {
+				this.board[i].fill(0);
 			}
 
 			for (let i = 0; i < this.shape.obj.mat.length; i++) {
@@ -116,8 +144,21 @@ export default {
 					}
 				}
 			}
-			this.shape.posY += 1;
+
 			console.log(this.board);
+			// for (let i = 0; i < this.board.length; i++) {
+			// 	for (let j = 0; j < this.board[i].length; j++) {
+			// 		process.stdout.write(this.board[i][j] + ',');
+			// 	}
+			// 	console.log();
+			// }
+
+			if (this.shape.posY + 2 >= this.block.rows - 1) {
+				this.isMake = false;
+				this.shape.posY = 0;
+			} else {
+				this.shape.posY += 1;
+			}
 		},
 		drawBackground() {
 			this.ctx.beginPath();
