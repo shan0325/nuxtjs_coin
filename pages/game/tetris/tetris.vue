@@ -142,6 +142,7 @@ export default {
 				posY: 0,
 				direction: 0,
 			},
+			speed: 1,
 			board: null,
 			beforeBoard: null,
 			reqAni: null,
@@ -156,18 +157,37 @@ export default {
 		this.draw();
 
 		document.addEventListener('keydown', this.keyDownHandler, false);
+		document.addEventListener('keyup', this.keyUpHandler, false);
 	},
 	methods: {
 		keyDownHandler(e) {
 			if (e.keyCode === 39) {
+				// right
 				const matrix = this.shape.obj.mat[this.shape.direction];
 				if (this.shape.posX + matrix[0].length < this.block.cols) {
 					this.shape.posX += 1;
 				}
 			} else if (e.keyCode === 37) {
+				// left
 				if (this.shape.posX > 0) {
 					this.shape.posX -= 1;
 				}
+			} else if (e.keyCode === 38) {
+				// up
+				if (this.shape.direction >= this.shape.obj.mat.length - 1) {
+					this.shape.direction = 0;
+				} else {
+					this.shape.direction += 1;
+				}
+			} else if (e.keyCode === 40) {
+				// down
+				this.speed = 10;
+			}
+		},
+		keyUpHandler(e) {
+			if (e.keyCode === 40) {
+				// up
+				this.speed = 1;
 			}
 		},
 		draw() {
@@ -179,7 +199,7 @@ export default {
 			this.start();
 
 			// this.reqAni = requestAnimationFrame(this.draw);
-			this.reqAni = setTimeout(this.draw, 500);
+			this.reqAni = setTimeout(this.draw, 500 / this.speed);
 		},
 		start() {
 			this.makeShape();
@@ -196,15 +216,14 @@ export default {
 			for (let i = 0; i < matrix.length; i++) {
 				for (let j = 0; j < matrix[i].length; j++) {
 					if (matrix[i][j] === 1) {
-						this.board[this.shape.posY + i][
-							this.shape.posX + j
-						] = 1;
+						if (this.shape.posY + i < this.board.length) {
+							this.board[this.shape.posY + i][
+								this.shape.posX + j
+							] = 1;
+						}
 					}
 				}
 			}
-
-			this.printBoard(this.board);
-			this.drawShape();
 
 			if (this.shape.posY + matrix.length >= this.block.rows) {
 				this.beforeBoard = JSON.parse(JSON.stringify(this.board));
@@ -213,6 +232,9 @@ export default {
 			} else {
 				this.shape.posY += 1;
 			}
+
+			this.printBoard(this.board);
+			this.drawShape();
 		},
 		makeShape() {
 			if (!this.shape.isMake) {
@@ -220,6 +242,7 @@ export default {
 				this.shape.obj = this.shapes[randomNum];
 				this.shape.posX = this.shape.obj.startPosX;
 				this.shape.isMake = true;
+				this.shape.direction = 0;
 				console.log(this.shape.obj);
 			}
 		},
