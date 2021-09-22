@@ -1,6 +1,13 @@
 <template>
 	<v-container fluid>
-		<canvas id="canvas" width="300px" height="600px"></canvas>
+		<v-row>
+			<v-col align="center">
+				<div class="text-h5 font-weight-bold">
+					번호 : {{ shape.number }} / 점수 : {{ score }} 점
+				</div>
+				<canvas id="canvas" width="300px" height="600px"></canvas>
+			</v-col>
+		</v-row>
 	</v-container>
 </template>
 
@@ -150,17 +157,20 @@ export default {
 				},
 			],
 			shape: {
+				number: 0,
+				beforeNumber: 0,
 				isMake: false,
 				obj: null,
 				posX: 0,
 				posY: 0,
 				direction: 0,
-				isBottomCollisioned: false,
+				isDownCollisioned: false,
 				isRightCollisioned: false,
 				isLeftCollisioned: false,
 				isUpCollisioned: false,
 			},
 			speed: 1,
+			score: 0,
 			board: null,
 			buildedBoard: null,
 			reqAni: null,
@@ -177,8 +187,18 @@ export default {
 		document.addEventListener('keydown', this.keyDownHandler, false);
 		document.addEventListener('keyup', this.keyUpHandler, false);
 	},
+	beforeDestroy() {
+		if (this.reqAni) {
+			// cancelAnimationFrame(this.reqAni);
+			clearTimeout(this.reqAni);
+		}
+	},
 	methods: {
 		keyDownHandler(e) {
+			if (this.shape.beforeNumber === this.shape.number) {
+				return;
+			}
+
 			if (e.keyCode === 39) {
 				// right
 				const matrix = this.shape.obj.mat[this.shape.direction];
@@ -225,7 +245,38 @@ export default {
 			} else if (e.keyCode === 32) {
 				// space
 				const matrix = this.shape.obj.mat[this.shape.direction];
-				this.shape.posY = this.block.rows - matrix.length;
+				let spacePosY = 0;
+				if (this.buildedBoard) {
+					for (
+						let k = this.shape.posY;
+						k <= this.block.rows - matrix.length;
+						k++
+					) {
+						if (spacePosY > 0) break;
+						for (let i = 0; i < matrix.length; i++) {
+							if (spacePosY > 0) break;
+							for (let j = 0; j < matrix[i].length; j++) {
+								if (matrix[i][j] === 1) {
+									if (
+										this.buildedBoard[k + i][
+											this.shape.posX + j
+										] > 0
+									) {
+										spacePosY = k - 1;
+										break;
+									}
+								}
+							}
+						}
+					}
+					this.shape.posY =
+						spacePosY === 0
+							? this.block.rows - matrix.length
+							: spacePosY;
+				} else {
+					this.shape.posY = this.block.rows - matrix.length;
+				}
+				this.shape.beforeNumber = this.shape.number;
 			}
 		},
 		keyUpHandler(e) {
@@ -235,9 +286,6 @@ export default {
 			}
 		},
 		draw() {
-			// 기존 실행되고있는 requestAnimationFrame 취소
-			// cancelAnimationFrame(this.reqAni);
-
 			this.ctx.clearRect(0, 0, this.width, this.height);
 			this.drawBackground();
 			this.start();
@@ -248,19 +296,39 @@ export default {
 		start() {
 			this.makeShape(); // 랜덤 도형 생성
 			this.initBoard(); // 초기화
-			this.checkBottomCollision(); // 아래 충돌 확인
+			this.checkDownCollision(); // 아래 충돌 확인
 			this.setBoard(); // 보드 셋팅
+			this.drawShape(); // 보드 렌더링
+			// this.printBoard(this.board);
+			this.calcScore(); // 스코어 계산
 
-			if (this.shape.isBottomCollisioned) {
+			if (this.shape.isDownCollisioned) {
 				this.buildedBoard = JSON.parse(JSON.stringify(this.board));
 				this.shape.isMake = false;
 				this.shape.posY = 0;
 			} else {
 				this.shape.posY += 1;
 			}
-
-			// this.printBoard(this.board);
-			this.drawShape();
+		},
+		calcScore() {
+			for (let i = 0; i < this.board.length; i++) {
+				let isFillRow = true;
+				for (let j = 0; j < this.board[i].length; j++) {
+					if (this.board[i][j] === 0) {
+						isFillRow = false;
+					}
+				}
+				if (isFillRow) {
+					this.score += 10;
+					if (i > 0) {
+						for (let k = i; k > 0; k--) {
+							for (let j = 0; j < this.board[k - 1].length; j++) {
+								this.board[k][j] = this.board[k - 1][j];
+							}
+						}
+					}
+				}
+			}
 		},
 		setBoard() {
 			const matrix = this.shape.obj.mat[this.shape.direction];
@@ -361,14 +429,14 @@ export default {
 				}
 			}
 		},
-		checkBottomCollision() {
+		checkDownCollision() {
 			const matrix = this.shape.obj.mat[this.shape.direction];
 			const nextPosY = this.shape.posY + 1;
 
-			this.shape.isBottomCollisioned = false;
+			this.shape.isDownCollisioned = false;
 			if (nextPosY + (matrix.length - 1) > this.block.rows - 1) {
 				console.log('바닥 충돌');
-				this.shape.isBottomCollisioned = true;
+				this.shape.isDownCollisioned = true;
 				return;
 			}
 
@@ -378,11 +446,12 @@ export default {
 						if (matrix[i][j] === 1) {
 							// 아래 도형 충돌 확인
 							if (
-								this.board[nextPosY + i][this.shape.posX + j] >
-								0
+								this.buildedBoard[nextPosY + i][
+									this.shape.posX + j
+								] > 0
 							) {
 								console.log('아래 도형 충돌');
-								this.shape.isBottomCollisioned = true;
+								this.shape.isDownCollisioned = true;
 								return;
 							}
 						}
@@ -403,10 +472,11 @@ export default {
 			if (!this.shape.isMake) {
 				const randomNum = this.getRandomInt(0, this.shapes.length - 1);
 				this.shape.obj = this.shapes[randomNum];
+				this.shape.number++;
 				this.shape.posX = this.shape.obj.startPosX;
 				this.shape.isMake = true;
 				this.shape.direction = 0;
-				// console.log(this.shape.obj);
+				// console.log(this.shape);
 			}
 		},
 		drawShape() {
