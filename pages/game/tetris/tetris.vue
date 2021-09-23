@@ -1,11 +1,48 @@
 <template>
-	<v-container fluid>
-		<v-row>
-			<v-col align="center">
-				<div class="text-h5 font-weight-bold">
-					번호 : {{ shape.number }} / 점수 : {{ score }} 점
-				</div>
-				<canvas id="canvas" width="300px" height="600px"></canvas>
+	<v-container>
+		<v-row align="center" no-gutters>
+			<v-col align="right" cols="6">
+				<v-row>
+					<v-col class="pb-0">
+						<v-card class="pa-2" tile outlined max-width="300">
+							{{ shape.number }} SCORE {{ score }} 점
+						</v-card>
+					</v-col>
+				</v-row>
+				<v-row>
+					<v-col>
+						<canvas
+							id="canvas"
+							width="300px"
+							height="600px"
+						></canvas>
+					</v-col>
+				</v-row>
+			</v-col>
+			<v-col cols="1"> </v-col>
+			<v-col align="left" cols="5">
+				<v-row>
+					<v-col class="pb-0">
+						<v-card
+							class="pa-2"
+							tile
+							outlined
+							max-width="100"
+							align="center"
+						>
+							NEXT
+						</v-card>
+					</v-col>
+				</v-row>
+				<v-row>
+					<v-col>
+						<canvas
+							id="infoCanvas"
+							width="100px"
+							height="150px"
+						></canvas>
+					</v-col>
+				</v-row>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -18,6 +55,9 @@ export default {
 			ctx: null,
 			width: 300,
 			height: 600,
+			infoCtx: null,
+			infoWidth: 100,
+			infoHeight: 150,
 			block: {
 				cols: 10,
 				rows: 20,
@@ -158,9 +198,9 @@ export default {
 			],
 			shape: {
 				number: 0,
-				beforeNumber: 0,
 				isMake: false,
 				obj: null,
+				nextObj: null,
 				posX: 0,
 				posY: 0,
 				direction: 0,
@@ -168,8 +208,12 @@ export default {
 				isRightCollisioned: false,
 				isLeftCollisioned: false,
 				isUpCollisioned: false,
+				beforeUpNumber: 0,
+				beforeSpaceNumber: 0,
 			},
-			speed: 1,
+			speed: 3,
+			defaultSpeed: 3,
+			downSpeed: 20,
 			score: 0,
 			board: null,
 			buildedBoard: null,
@@ -178,6 +222,7 @@ export default {
 	},
 	mounted() {
 		this.ctx = document.getElementById('canvas').getContext('2d');
+		this.infoCtx = document.getElementById('infoCanvas').getContext('2d');
 		this.board = Array.from(Array(this.block.rows), () =>
 			new Array(this.block.cols).fill(0),
 		);
@@ -195,10 +240,6 @@ export default {
 	},
 	methods: {
 		keyDownHandler(e) {
-			if (this.shape.beforeNumber === this.shape.number) {
-				return;
-			}
-
 			if (e.keyCode === 39) {
 				// right
 				const matrix = this.shape.obj.mat[this.shape.direction];
@@ -208,12 +249,14 @@ export default {
 					!this.shape.isRightCollisioned
 				) {
 					this.shape.posX += 1;
+					this.start(false);
 				}
 			} else if (e.keyCode === 37) {
 				// left
 				this.checkLeftEventCollision();
 				if (this.shape.posX > 0 && !this.shape.isLeftCollisioned) {
 					this.shape.posX -= 1;
+					this.start(false);
 				}
 			} else if (e.keyCode === 38) {
 				// up
@@ -221,7 +264,6 @@ export default {
 				if (this.shape.direction < this.shape.obj.mat.length - 1) {
 					nextDirection = this.shape.direction + 1;
 				}
-
 				const matrix = this.shape.obj.mat[nextDirection];
 				this.checkUpEventCollision(nextDirection);
 				if (
@@ -230,20 +272,17 @@ export default {
 					!this.shape.isUpCollisioned
 				) {
 					this.shape.direction = nextDirection;
-
-					const matrix = this.shape.obj.mat[this.shape.direction];
-					if (this.shape.posX + matrix[0].length > this.block.cols) {
-						this.shape.posX = this.block.cols - matrix[0].length;
-					}
-					if (this.shape.posY + matrix.length > this.block.rows) {
-						this.shape.posY = this.block.rows - matrix.length;
-					}
+					this.start(false);
 				}
 			} else if (e.keyCode === 40) {
 				// down
-				this.speed = 10;
+				this.speed = this.downSpeed;
 			} else if (e.keyCode === 32) {
 				// space
+				if (this.shape.beforeSpaceNumber === this.shape.number) {
+					return;
+				}
+
 				const matrix = this.shape.obj.mat[this.shape.direction];
 				let spacePosY = 0;
 				if (this.buildedBoard) {
@@ -276,38 +315,52 @@ export default {
 				} else {
 					this.shape.posY = this.block.rows - matrix.length;
 				}
-				this.shape.beforeNumber = this.shape.number;
+				this.start(false);
+				this.shape.beforeSpaceNumber = this.shape.number;
 			}
 		},
 		keyUpHandler(e) {
 			if (e.keyCode === 40) {
 				// down
-				this.speed = 1;
+				this.speed = this.defaultSpeed;
 			}
 		},
 		draw() {
-			this.ctx.clearRect(0, 0, this.width, this.height);
-			this.drawBackground();
-			this.start();
+			if (this.shape.isUpCollisioned) {
+				if (this.reqAni) {
+					clearTimeout(this.reqAni);
+					alert('END!!!');
+					return;
+				}
+			}
+
+			this.start(true);
 
 			// this.reqAni = requestAnimationFrame(this.draw);
-			this.reqAni = setTimeout(this.draw, 300 / this.speed);
+			this.reqAni = setTimeout(this.draw, 1000 / this.speed);
 		},
-		start() {
+		start(isEnableEndOfSetting) {
+			this.ctx.clearRect(0, 0, this.width, this.height);
+			this.drawBackground();
 			this.makeShape(); // 랜덤 도형 생성
 			this.initBoard(); // 초기화
-			this.checkDownCollision(); // 아래 충돌 확인
-			this.setBoard(); // 보드 셋팅
-			this.drawShape(); // 보드 렌더링
+			this.drawBuildedBoard(); // 쌓인 보드 렌더링
+			this.checkDownCollision(this.shape.posY + 1); // 아래 충돌 확인
+			this.drawShape(); // 도형 렌더링
+			this.setBoard(); // 만들어진 도형 보드 셋팅
 			// this.printBoard(this.board);
 			this.calcScore(); // 스코어 계산
 
-			if (this.shape.isDownCollisioned) {
-				this.buildedBoard = JSON.parse(JSON.stringify(this.board));
-				this.shape.isMake = false;
-				this.shape.posY = 0;
-			} else {
-				this.shape.posY += 1;
+			if (isEnableEndOfSetting) {
+				if (this.shape.isDownCollisioned) {
+					this.buildedBoard = JSON.parse(JSON.stringify(this.board));
+					this.shape.isMake = false;
+					this.shape.posY = 0;
+					this.setSpeedUp(); // 속도 증가
+					this.makeShape(); // 랜덤 도형 생성
+				} else {
+					this.shape.posY += 1;
+				}
 			}
 		},
 		calcScore() {
@@ -429,14 +482,15 @@ export default {
 				}
 			}
 		},
-		checkDownCollision() {
+		checkDownCollision(nextPosY) {
 			const matrix = this.shape.obj.mat[this.shape.direction];
-			const nextPosY = this.shape.posY + 1;
 
 			this.shape.isDownCollisioned = false;
+			this.shape.isUpCollisioned = false;
 			if (nextPosY + (matrix.length - 1) > this.block.rows - 1) {
 				console.log('바닥 충돌');
 				this.shape.isDownCollisioned = true;
+				this.shape.posY = this.block.rows - matrix.length;
 				return;
 			}
 
@@ -452,6 +506,10 @@ export default {
 							) {
 								console.log('아래 도형 충돌');
 								this.shape.isDownCollisioned = true;
+
+								if (this.shape.posY <= 0) {
+									this.shape.isUpCollisioned = true;
+								}
 								return;
 							}
 						}
@@ -470,16 +528,103 @@ export default {
 		},
 		makeShape() {
 			if (!this.shape.isMake) {
-				const randomNum = this.getRandomInt(0, this.shapes.length - 1);
-				this.shape.obj = this.shapes[randomNum];
+				if (this.shape.nextObj) {
+					this.shape.obj = this.shape.nextObj;
+					const randomNum = this.getRandomInt(
+						0,
+						this.shapes.length - 1,
+					);
+					this.shape.nextObj = this.shapes[randomNum];
+				} else {
+					const randomNum = this.getRandomInt(
+						0,
+						this.shapes.length - 1,
+					);
+					this.shape.obj = this.shapes[randomNum];
+					const nextRandomNum = this.getRandomInt(
+						0,
+						this.shapes.length - 1,
+					);
+					this.shape.nextObj = this.shapes[nextRandomNum];
+				}
+
 				this.shape.number++;
 				this.shape.posX = this.shape.obj.startPosX;
 				this.shape.isMake = true;
 				this.shape.direction = 0;
 				// console.log(this.shape);
+
+				this.infoCtx.clearRect(0, 0, this.infoWidth, this.infoHeight);
+				const nextMatrix = this.shape.nextObj.mat[0];
+				const startX =
+					(this.infoWidth - this.block.size * nextMatrix[0].length) /
+					2;
+				const startY =
+					(this.infoHeight - this.block.size * nextMatrix.length) / 2;
+				for (let i = 0; i < nextMatrix.length; i++) {
+					for (let j = 0; j < nextMatrix[i].length; j++) {
+						if (nextMatrix[i][j] === 1) {
+							this.infoCtx.beginPath();
+							this.infoCtx.fillStyle = this.shape.nextObj.color;
+							this.infoCtx.fillRect(
+								startX + j * this.block.size,
+								startY + i * this.block.size,
+								this.block.size,
+								this.block.size,
+							);
+							this.infoCtx.closePath();
+						}
+					}
+				}
+			}
+		},
+		setSpeedUp() {
+			if (!this.shape.isMake) {
+				if (this.shape.number % 10 === 0) {
+					this.speed++;
+					this.defaultSpeed++;
+				}
 			}
 		},
 		drawShape() {
+			const matrix = this.shape.obj.mat[this.shape.direction];
+			for (let i = 0; i < matrix.length; i++) {
+				for (let j = 0; j < matrix[i].length; j++) {
+					if (matrix[i][j] === 1) {
+						this.ctx.beginPath();
+						this.ctx.fillStyle = this.shape.obj.color;
+						this.ctx.fillRect(
+							(this.shape.posX + j) * this.block.size,
+							(this.shape.posY + i) * this.block.size,
+							this.block.size,
+							this.block.size,
+						);
+						this.ctx.closePath();
+					}
+				}
+			}
+		},
+		drawBuildedBoard() {
+			if (this.buildedBoard) {
+				for (let i = 0; i < this.buildedBoard.length; i++) {
+					for (let j = 0; j < this.buildedBoard[i].length; j++) {
+						if (this.buildedBoard[i][j] > 0) {
+							this.ctx.beginPath();
+							this.ctx.fillStyle =
+								this.shapes[this.buildedBoard[i][j] - 1].color;
+							this.ctx.fillRect(
+								j * this.block.size,
+								i * this.block.size,
+								this.block.size,
+								this.block.size,
+							);
+							this.ctx.closePath();
+						}
+					}
+				}
+			}
+		},
+		drawBoard() {
 			for (let i = 0; i < this.board.length; i++) {
 				for (let j = 0; j < this.board[i].length; j++) {
 					if (this.board[i][j] > 0) {
