@@ -1,48 +1,23 @@
 <template>
-	<v-container>
-		<v-row align="center" no-gutters>
-			<v-col align="right" cols="6">
-				<v-row>
-					<v-col class="pb-0">
-						<v-card class="pa-2" tile outlined max-width="300">
-							{{ shape.number }} SCORE {{ score }} 점
-						</v-card>
-					</v-col>
-				</v-row>
-				<v-row>
-					<v-col>
-						<canvas
-							id="canvas"
-							width="300px"
-							height="600px"
-						></canvas>
-					</v-col>
-				</v-row>
+	<v-container fluid>
+		<v-row>
+			<v-col align="right">
+				<v-card class="pa-2 mb-3" tile outlined width="300">
+					{{ shape.number }} SCORE {{ score }} 점
+				</v-card>
+				<canvas id="canvas" width="300px" height="600px"></canvas>
 			</v-col>
-			<v-col cols="1"> </v-col>
-			<v-col align="left" cols="5">
-				<v-row>
-					<v-col class="pb-0">
-						<v-card
-							class="pa-2"
-							tile
-							outlined
-							max-width="100"
-							align="center"
-						>
-							NEXT
-						</v-card>
-					</v-col>
-				</v-row>
-				<v-row>
-					<v-col>
-						<canvas
-							id="infoCanvas"
-							width="100px"
-							height="150px"
-						></canvas>
-					</v-col>
-				</v-row>
+			<v-col align="left">
+				<v-card
+					class="pa-2 mb-3"
+					tile
+					outlined
+					width="100"
+					align="center"
+				>
+					NEXT
+				</v-card>
+				<canvas id="infoCanvas" width="100px" height="150px"></canvas>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -67,14 +42,14 @@ export default {
 				{
 					seq: 1,
 					type: 'I',
-					color: '#f44336',
+					color: '#fbb0ac',
 					startPosX: 4,
 					mat: [[[1], [1], [1], [1]], [[1, 1, 1, 1]]],
 				},
 				{
 					seq: 2,
 					type: 'J',
-					color: '#e91e63',
+					color: '#96e0ed',
 					startPosX: 4,
 					mat: [
 						[
@@ -100,7 +75,7 @@ export default {
 				{
 					seq: 3,
 					type: 'L',
-					color: '#9c27b0',
+					color: '#c5d3d6',
 					startPosX: 4,
 					mat: [
 						[
@@ -126,7 +101,7 @@ export default {
 				{
 					seq: 4,
 					type: 'O',
-					color: '#00bcd4',
+					color: '#e3c1f1',
 					startPosX: 4,
 					mat: [
 						[
@@ -138,7 +113,7 @@ export default {
 				{
 					seq: 5,
 					type: 'T',
-					color: '#009688',
+					color: '#a7ece2',
 					startPosX: 4,
 					mat: [
 						[
@@ -164,7 +139,7 @@ export default {
 				{
 					seq: 6,
 					type: 'Z',
-					color: '#cddc39',
+					color: '#e0c6c3',
 					startPosX: 4,
 					mat: [
 						[
@@ -181,7 +156,7 @@ export default {
 				{
 					seq: 7,
 					type: 'S',
-					color: '#795548',
+					color: '#867761',
 					startPosX: 4,
 					mat: [
 						[
@@ -221,12 +196,32 @@ export default {
 		};
 	},
 	mounted() {
+		CanvasRenderingContext2D.prototype.roundRect = function (
+			x,
+			y,
+			width,
+			height,
+			radius,
+		) {
+			if (width < 2 * radius) radius = width / 2;
+			if (height < 2 * radius) radius = height / 2;
+			this.beginPath();
+			this.moveTo(x + radius, y);
+			this.arcTo(x + width, y, x + width, y + height, radius);
+			this.arcTo(x + width, y + height, x, y + height, radius);
+			this.arcTo(x, y + height, x, y, radius);
+			this.arcTo(x, y, x + width, y, radius);
+			this.closePath();
+			return this;
+		};
+
 		this.ctx = document.getElementById('canvas').getContext('2d');
 		this.infoCtx = document.getElementById('infoCanvas').getContext('2d');
 		this.board = Array.from(Array(this.block.rows), () =>
 			new Array(this.block.cols).fill(0),
 		);
 
+		this.shape.isUpCollisioned = true;
 		this.draw();
 
 		document.addEventListener('keydown', this.keyDownHandler, false);
@@ -240,7 +235,18 @@ export default {
 	},
 	methods: {
 		keyDownHandler(e) {
-			if (e.keyCode === 39) {
+			if (e.keyCode === 13) {
+				this.shape.isUpCollisioned = false;
+				this.shape.number = 0;
+				this.shape.isMake = false;
+				this.shape.obj = null;
+				this.shape.nextObj = null;
+				this.speed = 3;
+				this.defaultSpeed = 3;
+				this.score = 0;
+				this.buildedBoard = null;
+				this.draw();
+			} else if (e.keyCode === 39) {
 				// right
 				const matrix = this.shape.obj.mat[this.shape.direction];
 				this.checkRightEventCollision();
@@ -327,11 +333,11 @@ export default {
 		},
 		draw() {
 			if (this.shape.isUpCollisioned) {
+				this.drawEnterButton();
 				if (this.reqAni) {
 					clearTimeout(this.reqAni);
-					alert('END!!!');
-					return;
 				}
+				return;
 			}
 
 			this.start(true);
@@ -674,6 +680,32 @@ export default {
 				this.ctx.lineTo(this.width, i * this.block.size);
 				this.ctx.stroke();
 			}
+			this.ctx.closePath();
+		},
+		drawEnterButton() {
+			this.ctx.beginPath();
+			this.ctx.fillStyle = '#000';
+			this.ctx.globalAlpha = '0.7';
+			this.ctx.fillRect(0, 0, this.width, this.height);
+
+			const grd = this.ctx.createLinearGradient(0, 0, 300, 0);
+			grd.addColorStop(0, '#ee0979');
+			grd.addColorStop(1, '#ff6a00');
+
+			this.ctx.fillStyle = grd;
+			this.ctx.globalAlpha = '1.0';
+			this.ctx.roundRect(
+				(this.width - 120) / 2,
+				(this.height - 50) / 2,
+				120,
+				50,
+				10,
+			);
+			this.ctx.fill();
+
+			this.ctx.fillStyle = '#fff';
+			this.ctx.font = '15px sans-serif';
+			this.ctx.fillText('ENTER', 128, 305);
 			this.ctx.closePath();
 		},
 		getRandomInt(min, max) {
