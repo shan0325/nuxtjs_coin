@@ -182,10 +182,11 @@ export default {
 				isDownCollisioned: false,
 				isRightCollisioned: false,
 				isLeftCollisioned: false,
-				isUpCollisioned: false,
+				isUpEventCollisioned: false,
 				beforeUpNumber: 0,
 				beforeSpaceNumber: 0,
 			},
+			isGameEnd: true,
 			speed: 3,
 			defaultSpeed: 3,
 			downSpeed: 20,
@@ -221,7 +222,6 @@ export default {
 			new Array(this.block.cols).fill(0),
 		);
 
-		this.shape.isUpCollisioned = true;
 		this.draw();
 
 		document.addEventListener('keydown', this.keyDownHandler, false);
@@ -235,9 +235,16 @@ export default {
 	},
 	methods: {
 		keyDownHandler(e) {
+			if (e.keyCode !== 13) {
+				if (this.isGameEnd) return;
+			}
+
 			if (e.keyCode === 13) {
+				if (!this.isGameEnd) {
+					return;
+				}
 				// 초기화
-				this.shape.isUpCollisioned = false;
+				this.isGameEnd = false;
 				this.shape.number = 0;
 				this.shape.isMake = false;
 				this.shape.obj = null;
@@ -276,7 +283,7 @@ export default {
 				if (
 					this.shape.posX + matrix[0].length <= this.block.cols &&
 					this.shape.posX >= 0 &&
-					!this.shape.isUpCollisioned
+					!this.shape.isUpEventCollisioned
 				) {
 					this.shape.direction = nextDirection;
 					this.drawEventHandler();
@@ -285,11 +292,6 @@ export default {
 				// down
 				this.speed = this.downSpeed;
 			} else if (e.keyCode === 32) {
-				// space
-				// if (this.shape.beforeSpaceNumber === this.shape.number) {
-				// 	return;
-				// }
-
 				const matrix = this.shape.obj.mat[this.shape.direction];
 				let spacePosY = 0;
 				if (this.buildedBoard) {
@@ -322,14 +324,11 @@ export default {
 				} else {
 					this.shape.posY = this.block.rows - matrix.length;
 				}
-				// this.drawEventHandler();
 
 				if (this.reqAni) {
 					clearTimeout(this.reqAni);
 				}
 				this.draw();
-
-				// this.shape.beforeSpaceNumber = this.shape.number;
 			}
 		},
 		keyUpHandler(e) {
@@ -339,7 +338,7 @@ export default {
 			}
 		},
 		draw() {
-			if (this.shape.isUpCollisioned) {
+			if (this.isGameEnd) {
 				this.drawEnterButton();
 				if (this.reqAni) {
 					clearTimeout(this.reqAni);
@@ -398,6 +397,9 @@ export default {
 			}
 		},
 		setBoard() {
+			// if (this.isGameEnd) {
+			// }
+
 			const matrix = this.shape.obj.mat[this.shape.direction];
 			for (let i = 0; i < matrix.length; i++) {
 				for (let j = 0; j < matrix[i].length; j++) {
@@ -465,7 +467,7 @@ export default {
 			}
 		},
 		checkUpEventCollision(nextDirection) {
-			this.shape.isUpCollisioned = false;
+			this.shape.isUpEventCollisioned = false;
 			const nextMatrix = this.shape.obj.mat[nextDirection];
 
 			if (
@@ -473,7 +475,7 @@ export default {
 				this.block.rows - 1
 			) {
 				console.log('도형 변경 바닥 충돌');
-				this.shape.isUpCollisioned = true;
+				this.shape.isUpEventCollisioned = true;
 				return;
 			}
 
@@ -488,7 +490,7 @@ export default {
 								] > 0
 							) {
 								console.log('도형 변경 충돌');
-								this.shape.isUpCollisioned = true;
+								this.shape.isUpEventCollisioned = true;
 								return;
 							}
 						}
@@ -500,7 +502,7 @@ export default {
 			const matrix = this.shape.obj.mat[this.shape.direction];
 
 			this.shape.isDownCollisioned = false;
-			this.shape.isUpCollisioned = false;
+			this.isGameEnd = false;
 			if (nextPosY + (matrix.length - 1) > this.block.rows - 1) {
 				console.log('바닥 충돌');
 				this.shape.isDownCollisioned = true;
@@ -523,7 +525,7 @@ export default {
 
 								if (this.shape.posY <= 0) {
 									console.log('상단 도형 충돌');
-									this.shape.isUpCollisioned = true;
+									this.isGameEnd = true;
 								}
 								return;
 							}
@@ -569,6 +571,7 @@ export default {
 				this.shape.direction = 0;
 				// console.log(this.shape);
 
+				// NEXT 도형 렌더링
 				this.infoCtx.clearRect(0, 0, this.infoWidth, this.infoHeight);
 				const nextMatrix = this.shape.nextObj.mat[0];
 				const startX =
@@ -618,6 +621,11 @@ export default {
 					}
 				}
 			}
+
+			// this.ctx.beginPath();
+			// this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+			// this.ctx.fillRect(0, 0, 300, 120);
+			// this.ctx.closePath();
 		},
 		drawBuildedBoard() {
 			if (this.buildedBoard) {
