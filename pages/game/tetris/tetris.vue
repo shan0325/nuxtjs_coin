@@ -42,14 +42,14 @@ export default {
 				{
 					seq: 1,
 					type: 'I',
-					color: '#fbb0ac',
+					color: '#ffabab',
 					startPosX: 4,
 					mat: [[[1], [1], [1], [1]], [[1, 1, 1, 1]]],
 				},
 				{
 					seq: 2,
 					type: 'J',
-					color: '#96e0ed',
+					color: '#ffd4ab',
 					startPosX: 4,
 					mat: [
 						[
@@ -75,7 +75,7 @@ export default {
 				{
 					seq: 3,
 					type: 'L',
-					color: '#c5d3d6',
+					color: '#51bcd0',
 					startPosX: 4,
 					mat: [
 						[
@@ -101,7 +101,7 @@ export default {
 				{
 					seq: 4,
 					type: 'O',
-					color: '#e3c1f1',
+					color: '#eccaff',
 					startPosX: 4,
 					mat: [
 						[
@@ -113,7 +113,7 @@ export default {
 				{
 					seq: 5,
 					type: 'T',
-					color: '#a7ece2',
+					color: '#867761',
 					startPosX: 4,
 					mat: [
 						[
@@ -139,7 +139,7 @@ export default {
 				{
 					seq: 6,
 					type: 'Z',
-					color: '#e0c6c3',
+					color: '#cadeff',
 					startPosX: 4,
 					mat: [
 						[
@@ -156,7 +156,7 @@ export default {
 				{
 					seq: 7,
 					type: 'S',
-					color: '#867761',
+					color: '#dcad27',
 					startPosX: 4,
 					mat: [
 						[
@@ -236,6 +236,7 @@ export default {
 	methods: {
 		keyDownHandler(e) {
 			if (e.keyCode === 13) {
+				// 초기화
 				this.shape.isUpCollisioned = false;
 				this.shape.number = 0;
 				this.shape.isMake = false;
@@ -255,14 +256,14 @@ export default {
 					!this.shape.isRightCollisioned
 				) {
 					this.shape.posX += 1;
-					this.start(false);
+					this.drawEventHandler();
 				}
 			} else if (e.keyCode === 37) {
 				// left
 				this.checkLeftEventCollision();
 				if (this.shape.posX > 0 && !this.shape.isLeftCollisioned) {
 					this.shape.posX -= 1;
-					this.start(false);
+					this.drawEventHandler();
 				}
 			} else if (e.keyCode === 38) {
 				// up
@@ -278,16 +279,16 @@ export default {
 					!this.shape.isUpCollisioned
 				) {
 					this.shape.direction = nextDirection;
-					this.start(false);
+					this.drawEventHandler();
 				}
 			} else if (e.keyCode === 40) {
 				// down
 				this.speed = this.downSpeed;
 			} else if (e.keyCode === 32) {
 				// space
-				if (this.shape.beforeSpaceNumber === this.shape.number) {
-					return;
-				}
+				// if (this.shape.beforeSpaceNumber === this.shape.number) {
+				// 	return;
+				// }
 
 				const matrix = this.shape.obj.mat[this.shape.direction];
 				let spacePosY = 0;
@@ -321,8 +322,14 @@ export default {
 				} else {
 					this.shape.posY = this.block.rows - matrix.length;
 				}
-				this.start(false);
-				this.shape.beforeSpaceNumber = this.shape.number;
+				// this.drawEventHandler();
+
+				if (this.reqAni) {
+					clearTimeout(this.reqAni);
+				}
+				this.draw();
+
+				// this.shape.beforeSpaceNumber = this.shape.number;
 			}
 		},
 		keyUpHandler(e) {
@@ -340,33 +347,34 @@ export default {
 				return;
 			}
 
-			this.start(true);
+			this.start();
 
 			// this.reqAni = requestAnimationFrame(this.draw);
 			this.reqAni = setTimeout(this.draw, 1000 / this.speed);
 		},
-		start(isEnableEndOfSetting) {
-			this.ctx.clearRect(0, 0, this.width, this.height);
-			this.drawBackground();
+		drawEventHandler() {
+			this.drawBackground(); // 백그라운드 렌더링
+			this.drawBuildedBoard(); // 이전까지 쌓인 보드 렌더링
+			this.drawShape(); // 도형 렌더링
+		},
+		start() {
+			this.drawBackground(); // 백그라운드 렌더링
 			this.makeShape(); // 랜덤 도형 생성
-			this.initBoard(); // 초기화
-			this.drawBuildedBoard(); // 쌓인 보드 렌더링
-			this.checkDownCollision(this.shape.posY + 1); // 아래 충돌 확인
+			this.initBoard(); // board 객체 초기화
+			this.drawBuildedBoard(); // 이전까지 쌓인 보드 렌더링
+			this.checkDownCollision(this.shape.posY + 1); // 하단 충돌 확인
 			this.drawShape(); // 도형 렌더링
 			this.setBoard(); // 만들어진 도형 보드 셋팅
-			// this.printBoard(this.board);
 			this.calcScore(); // 스코어 계산
 
-			if (isEnableEndOfSetting) {
-				if (this.shape.isDownCollisioned) {
-					this.buildedBoard = JSON.parse(JSON.stringify(this.board));
-					this.shape.isMake = false;
-					this.shape.posY = 0;
-					this.setSpeedUp(); // 속도 증가
-					this.makeShape(); // 랜덤 도형 생성
-				} else {
-					this.shape.posY += 1;
-				}
+			if (this.shape.isDownCollisioned) {
+				this.buildedBoard = JSON.parse(JSON.stringify(this.board));
+				this.shape.isMake = false;
+				this.shape.posY = 0;
+				this.setSpeedUp(); // 속도 증가
+				this.makeShape(); // 랜덤 도형 생성
+			} else {
+				this.shape.posY += 1;
 			}
 		},
 		calcScore() {
@@ -416,13 +424,13 @@ export default {
 				for (let i = 0; i < matrix.length; i++) {
 					for (let j = 0; j < matrix[i].length; j++) {
 						if (matrix[i][j] === 1) {
-							// 왼쪽 도형 충돌 확인
+							// 좌측 도형 충돌 확인
 							if (
 								this.buildedBoard[this.shape.posY + i][
 									nextLeftPosX + j
 								] > 0
 							) {
-								console.log('왼쪽 도형 충돌');
+								console.log('좌측 도형 충돌');
 								this.shape.isLeftCollisioned = true;
 								return;
 							}
@@ -441,13 +449,13 @@ export default {
 				for (let i = 0; i < matrix.length; i++) {
 					for (let j = 0; j < matrix[i].length; j++) {
 						if (matrix[i][j] === 1) {
-							// 오른쪽 도형 충돌 확인
+							// 우측 도형 충돌 확인
 							if (
 								this.buildedBoard[this.shape.posY + i][
 									nextRightPosX + j
 								] > 0
 							) {
-								console.log('오른쪽 도형 충돌');
+								console.log('우측 도형 충돌');
 								this.shape.isRightCollisioned = true;
 								return;
 							}
@@ -504,16 +512,17 @@ export default {
 				for (let i = 0; i < matrix.length; i++) {
 					for (let j = 0; j < matrix[i].length; j++) {
 						if (matrix[i][j] === 1) {
-							// 아래 도형 충돌 확인
+							// 하단 도형 충돌 확인
 							if (
 								this.buildedBoard[nextPosY + i][
 									this.shape.posX + j
 								] > 0
 							) {
-								console.log('아래 도형 충돌');
+								console.log('하단 도형 충돌');
 								this.shape.isDownCollisioned = true;
 
 								if (this.shape.posY <= 0) {
+									console.log('상단 도형 충돌');
 									this.shape.isUpCollisioned = true;
 								}
 								return;
@@ -666,21 +675,26 @@ export default {
 			console.log(line);
 		},
 		drawBackground() {
-			this.ctx.beginPath();
-			this.ctx.strokeStyle = '#efefef';
+			this.ctx.clearRect(0, 0, this.width, this.height);
+			// this.ctx.strokeStyle = '#dbdee4';
+			this.ctx.strokeStyle = 'rgba(176, 180, 189, 0.3)';
+			this.ctx.lineWidth = 1;
 
 			for (let i = 1; i < this.block.cols; i++) {
+				this.ctx.beginPath();
 				this.ctx.moveTo(i * this.block.size, 0);
 				this.ctx.lineTo(i * this.block.size, this.height);
 				this.ctx.stroke();
+				this.ctx.closePath();
 			}
 
 			for (let i = 1; i < this.block.rows; i++) {
+				this.ctx.beginPath();
 				this.ctx.moveTo(0, i * this.block.size);
 				this.ctx.lineTo(this.width, i * this.block.size);
 				this.ctx.stroke();
+				this.ctx.closePath();
 			}
-			this.ctx.closePath();
 		},
 		drawEnterButton() {
 			this.ctx.beginPath();
